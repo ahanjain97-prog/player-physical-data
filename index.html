@@ -1,4 +1,4 @@
-<title>Player Physical Data</title>
+<title>NextPro & USL Physical Data</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
@@ -274,7 +274,10 @@ P.forEach(function(p){
   ML.forEach(function(l,j){var k=MG[j];g[k]=(g[k]||0)+p.pct[j];c[k]=(c[k]||0)+1;});
   p.groupsPct={}; GROUPS.forEach(function(k){p.groupsPct[k]=Math.round(g[k]/c[k]);});
   p.overall=Math.round(p.pct.reduce(function(a,b){return a+b;},0)/p.pct.length);
-  p.key=p.name+' | '+p.league+' | '+p.season;
+  /* Row index, not name: the file holds namesakes who share a league and season -- three
+     different players (A. Rocha, C. Herrera, N. Pierre) and four same-club pairs. A name
+     key would drop one of each. Index is stable because the build sorts by (name, season). */
+  p.key=String(p.i);
 });
 var byKey={}; P.forEach(function(p){byKey[p.key]=p;});
 
@@ -307,7 +310,8 @@ function drawRes(){
   if(!matches.length){res.innerHTML='<div class="none">No player matches that.</div>';res.hidden=false;return;}
   res.innerHTML=matches.map(function(p,j){
     return '<div class="'+(j===hi?'sel':'')+'" data-k="'+esc(p.key)+'"><span class="rn">'+esc(p.name)+
-      '</span><span class="rm">'+esc(p.team)+' &middot; '+lgShort(p.league)+' '+p.season+' &middot; '+p.grp+'</span></div>';}).join('');
+      '</span><span class="rm">'+esc(p.team)+' &middot; '+lgShort(p.league)+' '+p.season+' &middot; '+p.grp+
+      ' &middot; '+p.mins.toLocaleString()+'M</span></div>';}).join('');
   res.hidden=false;
 }
 q.addEventListener('input',function(){matches=search(q.value);hi=matches.length?0:-1;drawRes();});
@@ -336,7 +340,8 @@ function buildCompare(){
   var peers=P.filter(function(p){return p.league===cur.league&&p.season===cur.season&&p.grp===cur.grp&&p.key!==cur.key;})
     .sort(function(a,b){return a.name.localeCompare(b.name);});
   cmp.innerHTML='<option value="">&mdash; none &mdash;</option>'+peers.map(function(p){
-    return '<option value="'+esc(p.key)+'">'+esc(p.name)+' &middot; '+esc(p.team)+'</option>';}).join('');
+    return '<option value="'+esc(p.key)+'">'+esc(p.name)+' &middot; '+esc(p.team)+' &middot; '+
+      esc(p.pos.split(',')[0])+' &middot; '+p.mins.toLocaleString()+' min</option>';}).join('');
 }
 cmp.onchange=function(){render();};
 
@@ -381,9 +386,16 @@ function render(){
   document.getElementById('cmphint').textContent=c?('Blue marker = '+c.name+'.'):'Adds a marker on each bar.';
 
   /* season history */
-  var hs=P.filter(function(x){return x.name===p.name&&x.team===p.team;})
-        .sort(function(a,b){return a.season.localeCompare(b.season)||a.league.localeCompare(b.league);});
-  if(hs.length<2)hs=P.filter(function(x){return x.name===p.name;})
+  /* Namesakes: require the same position group, and keep one row per league-season --
+     preferring the same club, then most minutes -- so two different players who share an
+     abbreviated name never get stitched into one career. */
+  var cand=P.filter(function(x){return x.name===p.name&&x.grp===p.grp;});
+  var pick1={};
+  cand.forEach(function(x){
+    var k=x.league+'|'+x.season, held=pick1[k];
+    if(!held||(x.team===p.team&&held.team!==p.team)||
+       (('' +x.team===''+p.team)===(''+held.team===''+p.team)&&x.mins>held.mins))pick1[k]=x;});
+  var hs=Object.keys(pick1).map(function(k){return pick1[k];})
         .sort(function(a,b){return a.season.localeCompare(b.season)||a.league.localeCompare(b.league);});
   var hd=document.getElementById('hist');
   if(hs.length<2){hd.hidden=true;}
