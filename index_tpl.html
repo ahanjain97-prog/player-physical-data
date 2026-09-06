@@ -1,4 +1,7 @@
-<title>NextPro & USL Physical Data</title>
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NextPro &amp; USL Physical Data</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
@@ -12,8 +15,11 @@
   --body:"Barlow","Helvetica Neue",Arial,sans-serif;
 }
 *{box-sizing:border-box}
+html{color-scheme:dark}
 body{background:var(--ground);color:var(--ink);font-family:var(--body);
-  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;padding:0 0 64px}
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;margin:0;padding:0 0 64px}
+img{max-width:100%}
+[hidden]{display:none!important}
 .wrap{max-width:1240px;margin:0 auto;padding:0 24px}
 h1,h2,h3,.disp{font-family:var(--disp);text-transform:uppercase;letter-spacing:.055em;margin:0;font-weight:600}
 
@@ -79,7 +85,37 @@ select:focus-visible,input:focus-visible,tr:focus-visible,th:focus-visible,butto
 .tick{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--accent)}
 .rpct{font-variant-numeric:tabular-nums;font-size:12px;font-weight:600;color:var(--ink)}
 .rraw{font-variant-numeric:tabular-nums;font-size:11.5px;color:var(--muted);text-align:right;white-space:nowrap}
-.flagged .rlab::after{content:" \25B3";color:var(--warn);font-size:10px}
+.mk{display:inline-block;width:6px;height:6px;margin-left:6px;vertical-align:middle;border-radius:50%}
+.mk-cap{background:var(--p4)}
+.mk-mix{background:var(--p2)}
+.mk-des{background:var(--warn)}
+.mk-weak{background:var(--p0)}
+
+/* stability reference */
+.bands{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);margin-bottom:22px}
+.band{padding:11px 16px;flex:1 1 150px;min-width:0}
+.band+.band{border-left:1px solid var(--line)}
+.band .bk{font-family:var(--disp);font-size:10px;letter-spacing:.12em;color:var(--muted)}
+.band .bv{font-family:var(--disp);font-size:16px;color:var(--ink);margin-top:2px}
+.band .bd{font-size:11.5px;color:var(--muted);margin-top:3px}
+.gaps h4{font-family:var(--disp);text-transform:uppercase;letter-spacing:.055em;font-size:12.5px;
+  color:var(--ink2);margin:0 0 6px;font-weight:600}
+.stabwrap{overflow-x:auto;border:1px solid var(--line)}
+table.stab{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;min-width:640px}
+table.stab th{background:var(--panel2);font-family:var(--disp);font-size:9.5px;letter-spacing:.1em;
+  color:var(--muted);font-weight:500;padding:9px 12px;text-align:left;border-bottom:1px solid var(--line2);white-space:nowrap}
+table.stab th.n,table.stab td.n{text-align:right}
+table.stab td{padding:8px 12px;border-bottom:1px solid #1B1E24;font-size:12.5px;color:var(--ink2);vertical-align:top}
+table.stab tr:last-child td{border-bottom:0}
+table.stab td.m{color:var(--ink);white-space:nowrap}
+table.stab td.n{font-weight:600;color:var(--ink);white-space:nowrap}
+table.stab .cls{font-family:var(--disp);font-size:9.5px;letter-spacing:.1em;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:6px}
+table.stab tr.b-cap td.n.r{color:var(--p4)}
+table.stab tr.b-weak td.n.r{color:var(--p0)}
+table.stab tr.b-des td.n.t{color:var(--warn)}
+.gaps .why{font-size:12.5px;color:var(--muted);max-width:80ch;margin:14px 0 0}
+.gaps .why b{color:var(--ink2);font-weight:600}
 
 .nopool{margin:0 24px 22px;border:1px solid #4A3C22;background:#221B10;padding:12px 14px;
   color:var(--warn);font-size:12.5px}
@@ -118,7 +154,15 @@ select:focus-visible,input:focus-visible,tr:focus-visible,th:focus-visible,butto
 .legend{display:flex;align-items:center;font-size:10.5px;color:var(--muted);font-family:var(--disp);letter-spacing:.1em}
 .legend i{display:block;width:34px;height:9px}
 .legend .lbl{padding:0 8px}
+.mfilters{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;
+  padding:14px 16px;border:1px solid var(--line);background:var(--panel2)}
+.mfilters select{min-width:170px}
+.mfilters button{background:#0F1116;color:var(--ink2);border:1px solid var(--line2);border-radius:3px;
+  padding:8px 12px;font-family:var(--disp);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;cursor:pointer}
+.mfilters button:hover:not(:disabled){color:var(--accent);border-color:var(--accent)}
+.mfilters button:disabled{opacity:.4;cursor:default}
 .scroll{overflow-x:auto;border:1px solid var(--line);max-height:640px;overflow-y:auto}
+.empty{padding:26px 18px;color:var(--muted);font-size:13px;text-align:center}
 table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 th,td{padding:0;text-align:center}
 thead th{position:sticky;top:0;background:var(--panel2);border-bottom:1px solid var(--line2);
@@ -200,32 +244,41 @@ td.sep,th.sep{border-left:1px solid var(--line2)}
     </div>
 
     <div class="gaps">
-      <h3>How to read this</h3>
-      <p>Tracking baselines shift between seasons and between leagues by more than most players shift, so a raw
-      number from 2025 cannot be compared with one from 2026. Percentiles inside a single league-season-position
-      pool are the only stable unit here, and even those carry real noise.</p>
-      <div class="tiers">
-        <div class="tier">
-          <div class="th"><span class="dot" style="background:var(--p4)"></span>Trust these</div>
-          <ul><li><b>Distance Per 90</b> and <b>Meters Per Minute</b> are the most reproducible figures in the file.</li>
-          <li>Everything is a <b>per-90 rate</b>, so it is not distorted by minutes played.</li>
-          <li>All pools shown are <b>20+ players</b> unless the card says otherwise.</li></ul>
-        </div>
-        <div class="tier">
-          <div class="th"><span class="dot" style="background:var(--p1)"></span>Read with care</div>
-          <ul><li><b>Sprint distance and count</b> swing about 25&ndash;35% for the same player between seasons.</li>
-          <li><b>Acceleration and deceleration counts</b> are effort counts, not a measure of how explosive a player is.</li>
-          <li>Team style leaks in &mdash; a side that plays end-to-end lifts everyone's volume.</li></ul>
-        </div>
-        <div class="tier">
-          <div class="th"><span class="dot" style="background:var(--p0)"></span>Do not lean on these</div>
-          <ul><li><b>Max Speed</b> is a single-match peak. Year-over-year correlation within a position group is
-          about <b>0.2</b>, and the league-wide median rose roughly <b>1.2 km/h</b> in 2026 across all three
-          leagues at once &mdash; a measurement change, not players getting faster.</li>
-          <li><b>MLS NEXT Pro 2024</b> covers only 26% of that season's players. Treat it as indicative only.</li>
-          <li>Cross-league comparison of raw values. Use percentiles, or nothing.</li></ul>
-        </div>
+      <h3>Speed bands</h3>
+      <p>Every metre a player runs is filed into a speed band. Distance metrics are metres covered in that band
+      per 90; count metrics are how many separate times he entered it &mdash; discrete bursts, not continuous running.</p>
+      <div class="bands">
+        <div class="band"><div class="bk">RUNNING</div><div class="bv">15 &ndash; 20 km/h</div>
+          <div class="bd">Brisk running, roughly 9&ndash;12 mph.</div></div>
+        <div class="band"><div class="bk">HIGH SPEED RUNNING</div><div class="bv">20 &ndash; 25 km/h</div>
+          <div class="bd">Hard running, 12.4&ndash;15.5 mph.</div></div>
+        <div class="band"><div class="bk">SPRINTING</div><div class="bv">25+ km/h</div>
+          <div class="bd">Flat out, above 15.5 mph.</div></div>
+        <div class="band"><div class="bk">HIGH INTENSITY</div><div class="bv">20+ km/h</div>
+          <div class="bd">High speed running and sprinting added together.</div></div>
       </div>
+
+      <h3>How much weight each metric carries</h3>
+      <p>Two separate questions decide that. <b>Repeatability</b> is how well a metric holds up for the same player
+      across consecutive seasons, measured within his own position group (367 repeat players). <b>Team share</b>
+      is how much of the spread inside a pool is explained simply by which club he plays for, corrected for chance
+      by permutation. A metric can repeat well and still tell you more about the team than the player &mdash;
+      high acceleration count does exactly that.</p>
+      <div class="stabwrap">
+        <table class="stab">
+          <thead><tr><th>Metric</th><th class="n">Repeatability</th><th class="n">Team share</th>
+            <th>Reads as</th><th>Why</th></tr></thead>
+          <tbody id="stabbody"></tbody>
+        </table>
+      </div>
+      <p class="why"><b>The short version.</b> Sprint count and sprint distance are the closest thing here to a
+      measure of the athlete: they repeat about as well as anything in the file and are the least explained by his
+      club. Distance per 90 and meters per minute are reliable numbers but heavily role- and system-driven &mdash;
+      they describe the job he is asked to do more than what he is capable of. Acceleration and deceleration counts
+      are the most club-explained figures on the card. <b>Max speed is the one to distrust</b>: repeatability of
+      0.25, and the median rose about 1.2 km/h in 2026 in all three leagues at once, which is a measurement change
+      rather than players getting faster. Two coverage notes: <b>MLS NEXT Pro 2024</b> holds tracking for only 26%
+      of that season, and raw values are never comparable across seasons or leagues &mdash; use the percentiles.</p>
     </div>
   </section>
 
@@ -233,6 +286,12 @@ td.sep,th.sep{border-left:1px solid var(--line2)}
     <div class="mhead">
       <div><h2 id="mtitle">Comparison pool</h2><div class="msub" id="msub"></div></div>
       <div class="legend"><span class="lbl">LOW</span><i style="background:var(--p0)"></i><i style="background:var(--p1)"></i><i style="background:var(--p2)"></i><i style="background:var(--p3)"></i><i style="background:var(--p4)"></i><span class="lbl">HIGH</span></div>
+    </div>
+    <div class="mfilters">
+      <div class="ctl"><label for="fLg">League</label><select id="fLg"></select></div>
+      <div class="ctl"><label for="fSn">Season</label><select id="fSn"></select></div>
+      <div class="ctl"><label for="fGr">Position</label><select id="fGr"></select></div>
+      <button type="button" id="fReset">Back to this player's pool</button>
     </div>
     <div class="scroll"><table id="tbl"><thead></thead><tbody></tbody></table></div>
     <p class="foot"><b>Reading it.</b> Every cell is a percentile inside this pool only. Click a row to load that
@@ -250,8 +309,25 @@ var MG=D.metrics.map(function(m){return m.g;});
 var GROUPS=['Volume','Repeated Efforts','Top Speed','Accel / Decel'];
 var GRPN={};D.groups.forEach(function(g){GRPN[g.k]=g.n;});
 var MIN_POOL=10, THIN_POOL=20;
-var LOWREL={'Max Speed (km/h)':1,'Sprinting Distance Per 90 (+25)':1,'Sprint Count Per 90':1,
-            'High Acceleration Count Per 90':1,'High Deceleration Count Per 90':1};
+/* Per-metric verdict from the stability work in the panel below.
+   r  = year-over-year correlation, same player, within his own position group (n=367)
+   tm = share of spread inside a pool explained by which club he plays for, chance-corrected */
+var STAB={
+ 'Sprint Count Per 90':            {r:0.49,tm:12,c:'cap'},
+ 'Sprinting Distance Per 90 (+25)':{r:0.45,tm:12,c:'cap'},
+ 'HSR Count Per 90':               {r:0.40,tm:14,c:'cap'},
+ 'Running Distance Per 90 (15-20)':{r:0.42,tm:16,c:'mix'},
+ 'High Intensity Count Per 90':    {r:0.45,tm:17,c:'mix'},
+ 'HSR Distance Per 90 (20-25)':    {r:0.41,tm:17,c:'mix'},
+ 'High Intensity Distance Per 90': {r:0.43,tm:18,c:'mix'},
+ 'High Deceleration Count Per 90': {r:0.44,tm:21,c:'des'},
+ 'Meters Per Minute':              {r:0.42,tm:22,c:'des'},
+ 'Distance Per 90':                {r:0.42,tm:23,c:'des'},
+ 'Medium Acceleration Count Per 90':{r:0.43,tm:24,c:'des'},
+ 'Medium Deceleration Count Per 90':{r:0.46,tm:26,c:'des'},
+ 'High Acceleration Count Per 90': {r:0.50,tm:28,c:'des'},
+ 'Max Speed (km/h)':               {r:0.25,tm:17,c:'weak'}};
+var CLSN={cap:'Player capability',mix:'Mixed',des:'Team / role descriptor',weak:'Unreliable'};
 var UNIT={'Distance Per 90':'m','Running Distance Per 90 (15-20)':'m','Meters Per Minute':'mpm',
  'High Intensity Distance Per 90':'m','HSR Distance Per 90 (20-25)':'m','Sprinting Distance Per 90 (+25)':'m',
  'Max Speed (km/h)':'kmh'};
@@ -261,10 +337,12 @@ var SHORT={'Distance Per 90':'DIST','Running Distance Per 90 (15-20)':'RUN DIST'
  'HSR Count Per 90':'HSR CNT','Sprint Count Per 90':'SPR CNT','Max Speed (km/h)':'MAX SPD',
  'High Acceleration Count Per 90':'HI ACC','Medium Acceleration Count Per 90':'MED ACC',
  'High Deceleration Count Per 90':'HI DEC','Medium Deceleration Count Per 90':'MED DEC'};
-var NOTE={'Volume':'Total ground covered per 90 minutes.',
- 'Repeated Efforts':'Work above 20 km/h, as distance and as effort counts.',
- 'Top Speed':'Single-match peak speed. The least reliable figure on this card.',
- 'Accel / Decel':'How often a player changes pace, not how hard he can.'};
+var NOTE={
+ 'Volume':'Every metre he covers per 90 minutes, at any speed.',
+ 'Repeated Efforts':'Metres run faster than 20 km/h, and how many separate bursts that took. '+
+   '20&ndash;25 km/h is high-speed running; above 25 km/h is a sprint. High intensity is the two added together.',
+ 'Top Speed':'His single fastest moment of the season &mdash; one burst, not a repeatable capability.',
+ 'Accel / Decel':'How often he changes pace per 90. A count of efforts, not a measure of how hard he can accelerate.'};
 
 var P=D.rows.map(function(r,i){
   return {i:i,name:r[0],team:r[1],league:D.leagues[r[2]],season:D.seasons[r[3]],pos:r[4],
@@ -295,16 +373,44 @@ document.getElementById('stamp').innerHTML='MLS NEXT PRO &middot; USL C &middot;
 
 /* ---------- search ---------- */
 var q=document.getElementById('q'),res=document.getElementById('res'),cur=null,hi=-1,matches=[];
+/* Fold accents and punctuation so "garcia" finds "L. García" and "oneill" finds "M. O'Neill". */
+function norm(s){
+  s=String(s).toLowerCase();
+  if(s.normalize)s=s.normalize('NFD').replace(/[̀-ͯ]/g,'');
+  return s.replace(/[‘’'`.]/g,'').replace(/-/g,' ');
+}
+P.forEach(function(p){
+  p.nn=norm(p.name); p.nt=norm(p.team);
+  p.words=p.nn.split(/\s+/).filter(Boolean);
+  p.surname=p.words.length?p.words[p.words.length-1]:'';  /* "M. Harwood" -> "harwood" */
+});
+/* Score a player against the query. Lower is better; null means no match.
+   Surname beats forename beats initial beats club, so typing a bare last name works. */
+function score(p,toks){
+  var total=0;
+  for(var i=0;i<toks.length;i++){
+    var t=toks[i],s=null;
+    if(p.surname.indexOf(t)===0)s=0;
+    else if(p.words.some(function(w){return w.indexOf(t)===0;}))s=1;
+    else if(p.nn.indexOf(t)>=0)s=2;
+    else if(p.nt.split(/\s+/).some(function(w){return w.indexOf(t)===0;}))s=3;
+    else if(p.nt.indexOf(t)>=0)s=4;
+    if(s===null)return null;   /* every token must land somewhere */
+    total+=s;
+  }
+  return total;
+}
 function search(t){
-  t=t.trim().toLowerCase();
-  if(!t)return [];
-  var out=P.filter(function(p){return p.name.toLowerCase().indexOf(t)>=0||p.team.toLowerCase().indexOf(t)>=0;});
+  var toks=norm(t).split(/\s+/).filter(Boolean);
+  if(!toks.length)return [];
+  var out=[];
+  P.forEach(function(p){var s=score(p,toks);if(s!==null)out.push([s,p]);});
   out.sort(function(a,b){
-    var ai=a.name.toLowerCase().indexOf(t),bi=b.name.toLowerCase().indexOf(t);
-    if(ai!==bi)return (ai<0?99:ai)-(bi<0?99:bi);
-    if(a.name!==b.name)return a.name.localeCompare(b.name);
-    return b.season.localeCompare(a.season);});
-  return out.slice(0,60);
+    if(a[0]!==b[0])return a[0]-b[0];
+    if(a[1].surname!==b[1].surname)return a[1].surname.localeCompare(b[1].surname);
+    if(a[1].name!==b[1].name)return a[1].name.localeCompare(b[1].name);
+    return b[1].season.localeCompare(a[1].season)||a[1].league.localeCompare(b[1].league);});
+  return out.slice(0,60).map(function(x){return x[1];});
 }
 function drawRes(){
   if(!matches.length){res.innerHTML='<div class="none">No player matches that.</div>';res.hidden=false;return;}
@@ -330,7 +436,8 @@ document.addEventListener('click',function(e){if(!e.target.closest('.ctl'))res.h
 
 function pick(k){
   cur=byKey[k]; res.hidden=true; q.value=cur.name;
-  buildCompare(); render(); paint();
+  buildCompare(); render();
+  setFilter({league:cur.league,season:cur.season,grp:cur.grp});
   if(history.replaceState)history.replaceState(null,'','#'+encodeURIComponent(k));
 }
 
@@ -350,8 +457,9 @@ function rows(g,p,c,showPct){
   var out='';
   ML.forEach(function(l,j){
     if(MG[j]!==g)return;
-    var v=p.pct[j],cv=c?c.pct[j]:null;
-    out+='<div class="row'+(LOWREL[l]?' flagged':'')+'"><div class="rlab">'+esc(l)+'</div>'+
+    var v=p.pct[j],cv=c?c.pct[j]:null,s=STAB[l];
+    out+='<div class="row"><div class="rlab" title="'+CLSN[s.c]+' — repeatability r '+s.r.toFixed(2)+
+      ', team share '+s.tm+'%">'+esc(l)+'<i class="mk mk-'+s.c+'"></i></div>'+
       '<div class="track">'+(showPct?'<div class="fill" style="width:'+v+'%;background:'+band(v)+'"></div>':'')+
       (showPct&&cv!==null?'<div class="tick" style="left:calc('+cv+'% - 1px)" title="'+esc(c.name)+': '+cv+'"></div>':'')+
       '</div><div class="rpct">'+(showPct?v:'&ndash;')+'</div>'+
@@ -431,10 +539,50 @@ var sortK='overall',desc=true;
 document.querySelector('#tbl thead').innerHTML='<tr>'+COLS.map(function(c){
   return '<th tabindex="0" class="'+(c.k==='nm'?'nm':'')+(c.sep?' sep':'')+'" data-k="'+esc(c.k)+'">'+c.t+'</th>';}).join('')+'</tr>';
 
+/* The matrix browses independently of the card. It follows the selected player by default,
+   but the three filters below it can point anywhere in the dataset. */
+var flt=null;
+var fLg=document.getElementById('fLg'),fSn=document.getElementById('fSn'),
+    fGr=document.getElementById('fGr'),fReset=document.getElementById('fReset');
+var COMBO={};
+P.forEach(function(p){COMBO[p.league+'|'+p.season+'|'+p.grp]=(COMBO[p.league+'|'+p.season+'|'+p.grp]||0)+1;});
+function opts(sel,vals,chosen,labeller){
+  sel.innerHTML=vals.map(function(v){
+    return '<option value="'+esc(v)+'"'+(v===chosen?' selected':'')+'>'+esc(labeller?labeller(v):v)+'</option>';}).join('');
+}
+function syncFilters(){
+  opts(fLg,D.leagues,flt.league);
+  /* only offer seasons and positions that actually exist for the chosen league */
+  var seasons=D.seasons.filter(function(s){
+    return D.groups.some(function(g){return COMBO[flt.league+'|'+s+'|'+g.k];});});
+  if(seasons.indexOf(flt.season)<0)flt.season=seasons[seasons.length-1];
+  opts(fSn,seasons,flt.season);
+  var grps=D.groups.map(function(g){return g.k;}).filter(function(g){
+    return COMBO[flt.league+'|'+flt.season+'|'+g];});
+  if(grps.indexOf(flt.grp)<0)flt.grp=grps[0];
+  opts(fGr,grps,flt.grp,function(g){return GRPN[g];});
+  fReset.disabled=(flt.league===cur.league&&flt.season===cur.season&&flt.grp===cur.grp);
+}
+function setFilter(f){flt=f;syncFilters();paint();}
+fLg.onchange=function(){flt.league=fLg.value;syncFilters();paint();};
+fSn.onchange=function(){flt.season=fSn.value;syncFilters();paint();};
+fGr.onchange=function(){flt.grp=fGr.value;syncFilters();paint();};
+fReset.onclick=function(){setFilter({league:cur.league,season:cur.season,grp:cur.grp});};
+
 function paint(){
-  var pool=P.filter(function(x){return x.league===cur.league&&x.season===cur.season&&x.grp===cur.grp;});
-  document.getElementById('mtitle').textContent=cur.league+' '+cur.season+' — '+GRPN[cur.grp];
-  document.getElementById('msub').textContent=pool.length+' players with tracking data. This is the pool every bar on the card above is measured against.';
+  if(!flt)flt={league:cur.league,season:cur.season,grp:cur.grp};
+  var pool=P.filter(function(x){return x.league===flt.league&&x.season===flt.season&&x.grp===flt.grp;});
+  var isOwn=(flt.league===cur.league&&flt.season===cur.season&&flt.grp===cur.grp);
+  fReset.disabled=isOwn;
+  document.getElementById('mtitle').textContent=flt.league+' '+flt.season+' — '+GRPN[flt.grp];
+  document.getElementById('msub').textContent=pool.length+' players with tracking data. '+
+    (isOwn?'This is the pool every bar on the card above is measured against.'
+          :'Browsing a different pool — the card above still shows '+cur.name+' ranked against his own.');
+  if(!pool.length){
+    document.querySelector('#tbl tbody').innerHTML=
+      '<tr><td class="empty" colspan="'+COLS.length+'">No tracking data for that combination.</td></tr>';
+    return;
+  }
   var rs=pool.slice().sort(function(a,b){var x=val(a,sortK),y=val(b,sortK);
     return typeof x==='string'?x.localeCompare(y)*(desc?-1:1):(desc?y-x:x-y);});
   document.querySelector('#tbl tbody').innerHTML=rs.map(function(p){
@@ -468,6 +616,33 @@ if(!start){
   var pref=P.filter(function(p){return p.season==='2026'&&p.pool>=THIN_POOL&&p.mins>1200;});
   start=(pref.length?pref:P).slice().sort(function(a,b){return b.overall-a.overall;})[0];
 }
-cur=start; q.value=cur.name; buildCompare(); render(); paint();
+/* stability reference table */
+var WHY={
+ 'Sprint Count Per 90':'The least club-explained number on the card.',
+ 'Sprinting Distance Per 90 (+25)':'Top-end volume he brings himself, not the system.',
+ 'HSR Count Per 90':'Individual, but the softest repeatability of the sprint family.',
+ 'Running Distance Per 90 (15-20)':'Middle-gear volume. Part player, part role.',
+ 'High Intensity Count Per 90':'Bursts above 20 km/h. Part player, part system.',
+ 'HSR Distance Per 90 (20-25)':'Carries much the same signal as HSR count.',
+ 'High Intensity Distance Per 90':'HSR and sprint distance combined, so it inherits both.',
+ 'High Deceleration Count Per 90':'Tracks how often his side has to stop and turn.',
+ 'Meters Per Minute':'Distance per 90 with minutes divided out. Same role signal.',
+ 'Distance Per 90':'Reliable, but it is largely the job description.',
+ 'Medium Acceleration Count Per 90':'Low threshold, so it is dominated by team tempo.',
+ 'Medium Deceleration Count Per 90':'Low threshold, so it is dominated by team tempo.',
+ 'High Acceleration Count Per 90':'Repeats well, yet the most club-explained figure here.',
+ 'Max Speed (km/h)':'One burst in one match. Do not read a trend into it.'};
+var CORDER={cap:0,mix:1,des:2,weak:3};
+document.getElementById('stabbody').innerHTML=ML.slice().sort(function(a,b){
+    var d=CORDER[STAB[a].c]-CORDER[STAB[b].c];
+    return d||STAB[b].r-STAB[a].r;}).map(function(l){
+  var s=STAB[l];
+  return '<tr class="b-'+s.c+'"><td class="m">'+esc(l)+'</td>'+
+    '<td class="n r">'+s.r.toFixed(2)+'</td><td class="n t">'+s.tm+'%</td>'+
+    '<td><span class="cls"><i class="mk mk-'+s.c+'" style="margin-left:0"></i>'+CLSN[s.c]+'</span></td>'+
+    '<td>'+WHY[l]+'</td></tr>';}).join('');
+
+cur=start; q.value=cur.name; buildCompare(); render();
+setFilter({league:cur.league,season:cur.season,grp:cur.grp});
 })();
 </script>
