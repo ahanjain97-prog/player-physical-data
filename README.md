@@ -4,7 +4,7 @@ A single-page site for browsing tracking data across MLS NEXT Pro, USL Champions
 USL League One, 2024–2026. Search a player, get a physical capability card: every metric
 percentile-ranked against players in the **same league, same season, same position group**.
 
-**Live:** _(set once GitHub Pages is enabled — Settings → Pages → Deploy from branch `main`, folder `/root`)_
+**Live:** https://ahanjain97-prog.github.io/player-physical-data/
 
 ## What's in it
 
