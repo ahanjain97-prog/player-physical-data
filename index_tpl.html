@@ -1,0 +1,461 @@
+<title>Player Physical Data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#0B0C0F; --panel:#15171C; --panel2:#1B1E25; --line:#262A33; --line2:#333944;
+  --ink:#EDEFF2; --ink2:#B4BAC3; --muted:#828A96; --accent:#8CD2F4;
+  --p0:#DA3A3F; --p1:#EF9C9F; --p2:#9AA1AC; --p3:#7ED289; --p4:#39B15A;
+  --warn:#E8B45A;
+  --disp:"Oswald","Arial Narrow",Impact,sans-serif;
+  --body:"Barlow","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;padding:0 0 64px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+h1,h2,h3,.disp{font-family:var(--disp);text-transform:uppercase;letter-spacing:.055em;margin:0;font-weight:600}
+
+header{border-bottom:1px solid var(--line);background:linear-gradient(180deg,#111319,var(--ground));padding:34px 0 26px}
+.mast{display:flex;align-items:flex-start;justify-content:space-between;gap:32px;flex-wrap:wrap}
+.mast .bar{width:4px;align-self:stretch;background:var(--accent);flex:none}
+.mastL{display:flex;gap:16px;align-items:stretch}
+h1{font-size:30px;line-height:1.05;color:var(--ink)}
+h1 em{display:block;font-style:normal;color:var(--muted)}
+.sub{font-family:var(--body);text-transform:none;letter-spacing:0;color:var(--ink2);
+  max-width:62ch;margin-top:12px;font-size:13.5px}
+.sub b{color:var(--ink);font-weight:600}
+.stamp{font-family:var(--disp);font-size:11px;letter-spacing:.16em;color:var(--muted);text-align:right;line-height:1.9}
+.stamp b{color:var(--accent);font-weight:500}
+
+.controls{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;padding:16px 0;
+  border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--ground);z-index:40}
+.ctl{display:flex;flex-direction:column;gap:5px;position:relative}
+.ctl label{font-family:var(--disp);font-size:10px;letter-spacing:.14em;color:var(--muted)}
+select,input[type=text]{background:var(--panel2);color:var(--ink);border:1px solid var(--line2);border-radius:3px;
+  padding:8px 10px;font-family:var(--body);font-size:13.5px}
+select{min-width:150px}
+#q{min-width:300px}
+#q::placeholder{color:#5F6875}
+select:focus-visible,input:focus-visible,tr:focus-visible,th:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.results{position:absolute;top:100%;left:0;right:0;min-width:380px;background:#12141A;border:1px solid var(--line2);
+  border-top:0;max-height:340px;overflow-y:auto;z-index:60}
+.results[hidden]{display:none}
+.results div{padding:8px 11px;cursor:pointer;border-bottom:1px solid #1C1F27;font-size:13px;display:flex;
+  justify-content:space-between;gap:12px;align-items:baseline}
+.results div:last-child{border-bottom:0}
+.results div:hover,.results div.sel{background:#22303C}
+.results .rn{color:var(--ink);white-space:nowrap}
+.results .rm{color:var(--muted);font-size:11.5px;white-space:nowrap;font-family:var(--disp);letter-spacing:.06em}
+.results .none{color:var(--muted);cursor:default}
+.hint{color:var(--muted);font-size:12px;padding-bottom:9px}
+
+.card{border:1px solid var(--line);background:var(--panel);margin-top:26px}
+.cardhead{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;
+  padding:20px 24px;border-bottom:1px solid var(--line);background:var(--panel2)}
+.pname{font-family:var(--disp);font-size:26px;letter-spacing:.03em;line-height:1.1;text-transform:uppercase}
+.pmeta{color:var(--muted);font-size:12.5px;margin-top:3px}
+.pmeta span{color:var(--ink2)}
+.pool{font-family:var(--disp);font-size:10.5px;letter-spacing:.11em;color:var(--muted);margin-top:7px}
+.pool b{color:var(--accent);font-weight:500}
+.chips{display:flex;gap:10px;flex-wrap:wrap}
+.chip{border:1px solid var(--line2);padding:7px 11px;min-width:106px;background:#0F1116}
+.chip .k{font-family:var(--disp);font-size:9.5px;letter-spacing:.13em;color:var(--muted)}
+.chip .v{font-family:var(--disp);font-size:21px;line-height:1.15}
+.chip.ovr{background:#0B0D11}
+
+.cols{display:grid;grid-template-columns:1fr 1fr}
+.col{padding:22px 24px 26px}
+.col+.col{border-left:1px solid var(--line)}
+.grp+.grp{margin-top:26px}
+.grp h3{font-size:14.5px;color:var(--ink);margin-bottom:2px}
+.grpnote{font-size:11.5px;color:var(--muted);margin-bottom:12px;max-width:52ch}
+
+.row{display:grid;grid-template-columns:1fr minmax(90px,1.3fr) 30px 78px;gap:10px;align-items:center;padding:3.5px 0}
+.rlab{font-size:11.5px;color:var(--ink2);text-align:right;line-height:1.25}
+.track{position:relative;height:17px;background:#0D0F13;border:1px solid #21252D}
+.fill{position:absolute;top:0;bottom:0;left:0;border-radius:0 3px 3px 0}
+.tick{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--accent)}
+.rpct{font-variant-numeric:tabular-nums;font-size:12px;font-weight:600;color:var(--ink)}
+.rraw{font-variant-numeric:tabular-nums;font-size:11.5px;color:var(--muted);text-align:right;white-space:nowrap}
+.flagged .rlab::after{content:" \25B3";color:var(--warn);font-size:10px}
+
+.nopool{margin:0 24px 22px;border:1px solid #4A3C22;background:#221B10;padding:12px 14px;
+  color:var(--warn);font-size:12.5px}
+.nopool[hidden]{display:none}
+
+.hist{padding:20px 24px 24px;border-top:1px solid var(--line);background:#101218}
+.hist h3{font-size:13px;color:var(--ink2);margin-bottom:3px}
+.hist .note{font-size:11.5px;color:var(--muted);margin-bottom:14px;max-width:70ch}
+.hrow{display:grid;grid-template-columns:190px 1fr;gap:14px;align-items:center;padding:5px 0}
+.hrow .hl{font-size:12px;color:var(--ink2);text-align:right;white-space:nowrap}
+.hrow .hl b{color:var(--ink);font-weight:600}
+.hbars{display:flex;gap:5px;align-items:flex-end}
+.hbar{flex:1;min-width:0;text-align:center}
+.hbar .hv{font-family:var(--disp);font-size:12px;line-height:1}
+.hbar .hb{height:26px;margin-top:4px;border-radius:2px 2px 0 0}
+.hbar .hk{font-size:9.5px;color:var(--muted);margin-top:4px;font-family:var(--disp);letter-spacing:.06em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.gaps{padding:22px 24px 26px;border-top:1px solid var(--line);background:#101218}
+.gaps h3{font-size:13px;color:var(--ink2)}
+.gaps p{font-size:12.5px;color:var(--muted);max-width:76ch;margin:8px 0 16px}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line)}
+.tier{padding:14px 16px}
+.tier+.tier{border-left:1px solid var(--line)}
+.tier .th{font-family:var(--disp);font-size:10px;letter-spacing:.13em;margin-bottom:9px;display:flex;align-items:center;gap:7px;color:var(--ink2)}
+.dot{width:8px;height:8px;flex:none}
+.tier ul{margin:0;padding-left:16px;color:var(--ink2);font-size:12px;line-height:1.6}
+.tier li{margin-bottom:5px}
+.tier li::marker{color:var(--line2)}
+.tier b{color:var(--ink);font-weight:600}
+
+.matrix{margin-top:40px}
+.mhead{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:12px}
+.mhead h2{font-size:17px}
+.mhead .msub{font-size:12px;color:var(--muted);margin-top:3px;text-transform:none;letter-spacing:0;font-family:var(--body)}
+.legend{display:flex;align-items:center;font-size:10.5px;color:var(--muted);font-family:var(--disp);letter-spacing:.1em}
+.legend i{display:block;width:34px;height:9px}
+.legend .lbl{padding:0 8px}
+.scroll{overflow-x:auto;border:1px solid var(--line);max-height:640px;overflow-y:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:0;text-align:center}
+thead th{position:sticky;top:0;background:var(--panel2);border-bottom:1px solid var(--line2);
+  font-family:var(--disp);font-size:9.5px;letter-spacing:.08em;color:var(--muted);font-weight:500;
+  padding:9px 5px;cursor:pointer;white-space:nowrap;user-select:none}
+thead th:hover,thead th.sorted{color:var(--accent)}
+th.nm,td.nm{text-align:left;padding-left:14px;padding-right:12px;position:sticky;left:0;z-index:2}
+thead th.nm{z-index:3}
+td.nm{background:var(--panel);border-right:1px solid var(--line)}
+tbody tr{cursor:pointer;border-bottom:1px solid #1B1E24}
+tbody tr:hover td{background:#1E222A}
+tbody tr:hover td.nm{background:#232833}
+tbody tr.on td.nm{background:#243040;box-shadow:inset 3px 0 0 var(--accent)}
+td.nm .n{font-size:13px;color:var(--ink);white-space:nowrap}
+td.nm .t{font-size:10.5px;color:var(--muted);white-space:nowrap}
+td.v{font-size:12px;color:var(--ink);padding:7px 5px;min-width:40px}
+td.g{font-family:var(--disp);font-size:13px;padding:7px 5px;min-width:46px}
+td.sep,th.sep{border-left:1px solid var(--line2)}
+.foot{margin-top:22px;color:var(--muted);font-size:12px;max-width:88ch}
+.foot b{color:var(--ink2);font-weight:600}
+@media (max-width:900px){
+  .cols{grid-template-columns:1fr}
+  .col+.col{border-left:0;border-top:1px solid var(--line)}
+  .tiers{grid-template-columns:1fr}
+  .tier+.tier{border-left:0;border-top:1px solid var(--line)}
+  .row{grid-template-columns:1fr minmax(70px,1fr) 28px 70px}
+  .hrow{grid-template-columns:1fr;gap:6px}
+  .hrow .hl{text-align:left}
+  #q{min-width:220px}
+}
+@media (prefers-reduced-motion:no-preference){.fill{transition:width .28s ease}}
+</style>
+
+<header>
+  <div class="wrap mast">
+    <div class="mastL"><div class="bar"></div>
+      <div>
+        <h1>Physical<em>Capability</em></h1>
+        <p class="sub">Tracking data for <b>2,079 player-seasons</b> across MLS NEXT Pro, USL Championship
+        and USL League One, 2024&ndash;2026. Every bar is a percentile against players in the
+        <b>same league, same season, same position group</b> &mdash; the only comparison this data supports.</p>
+      </div>
+    </div>
+    <div class="stamp" id="stamp"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="controls">
+    <div class="ctl">
+      <label for="q">Find a player</label>
+      <input type="text" id="q" placeholder="Start typing a name&hellip;" autocomplete="off" spellcheck="false">
+      <div class="results" id="res" hidden></div>
+    </div>
+    <div class="ctl"><label for="cmp">Compare against</label><select id="cmp"></select></div>
+    <div class="hint" id="cmphint">Adds a marker on each bar.</div>
+  </div>
+
+  <section class="card">
+    <div class="cardhead">
+      <div>
+        <div class="pname" id="pn"></div>
+        <div class="pmeta" id="pm"></div>
+        <div class="pool" id="pl"></div>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="nopool" id="nopool" hidden></div>
+    <div class="cols">
+      <div class="col" id="colA"></div>
+      <div class="col" id="colB"></div>
+    </div>
+
+    <div class="hist" id="hist" hidden>
+      <h3>Season history</h3>
+      <div class="note">Same player, each season percentile-ranked inside that season's own pool.
+      Large swings here are normal &mdash; see the reliability note below before reading a change as real.</div>
+      <div id="histbody"></div>
+    </div>
+
+    <div class="gaps">
+      <h3>How to read this</h3>
+      <p>Tracking baselines shift between seasons and between leagues by more than most players shift, so a raw
+      number from 2025 cannot be compared with one from 2026. Percentiles inside a single league-season-position
+      pool are the only stable unit here, and even those carry real noise.</p>
+      <div class="tiers">
+        <div class="tier">
+          <div class="th"><span class="dot" style="background:var(--p4)"></span>Trust these</div>
+          <ul><li><b>Distance Per 90</b> and <b>Meters Per Minute</b> are the most reproducible figures in the file.</li>
+          <li>Everything is a <b>per-90 rate</b>, so it is not distorted by minutes played.</li>
+          <li>All pools shown are <b>20+ players</b> unless the card says otherwise.</li></ul>
+        </div>
+        <div class="tier">
+          <div class="th"><span class="dot" style="background:var(--p1)"></span>Read with care</div>
+          <ul><li><b>Sprint distance and count</b> swing about 25&ndash;35% for the same player between seasons.</li>
+          <li><b>Acceleration and deceleration counts</b> are effort counts, not a measure of how explosive a player is.</li>
+          <li>Team style leaks in &mdash; a side that plays end-to-end lifts everyone's volume.</li></ul>
+        </div>
+        <div class="tier">
+          <div class="th"><span class="dot" style="background:var(--p0)"></span>Do not lean on these</div>
+          <ul><li><b>Max Speed</b> is a single-match peak. Year-over-year correlation within a position group is
+          about <b>0.2</b>, and the league-wide median rose roughly <b>1.2 km/h</b> in 2026 across all three
+          leagues at once &mdash; a measurement change, not players getting faster.</li>
+          <li><b>MLS NEXT Pro 2024</b> covers only 26% of that season's players. Treat it as indicative only.</li>
+          <li>Cross-league comparison of raw values. Use percentiles, or nothing.</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="matrix">
+    <div class="mhead">
+      <div><h2 id="mtitle">Comparison pool</h2><div class="msub" id="msub"></div></div>
+      <div class="legend"><span class="lbl">LOW</span><i style="background:var(--p0)"></i><i style="background:var(--p1)"></i><i style="background:var(--p2)"></i><i style="background:var(--p3)"></i><i style="background:var(--p4)"></i><span class="lbl">HIGH</span></div>
+    </div>
+    <div class="scroll"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+    <p class="foot"><b>Reading it.</b> Every cell is a percentile inside this pool only. Click a row to load that
+    player's card; click a column header to sort. <b>AVG</b> is the mean of all fourteen percentiles &mdash; a rough
+    summary of physical output, not a rating of the player.</p>
+  </section>
+</div>
+
+<script id="phys" type="application/json">__DATA__</script>
+<script>
+(function(){
+var D=JSON.parse(document.getElementById('phys').textContent);
+var ML=D.metrics.map(function(m){return m.l;});
+var MG=D.metrics.map(function(m){return m.g;});
+var GROUPS=['Volume','Repeated Efforts','Top Speed','Accel / Decel'];
+var GRPN={};D.groups.forEach(function(g){GRPN[g.k]=g.n;});
+var MIN_POOL=10, THIN_POOL=20;
+var LOWREL={'Max Speed (km/h)':1,'Sprinting Distance Per 90 (+25)':1,'Sprint Count Per 90':1,
+            'High Acceleration Count Per 90':1,'High Deceleration Count Per 90':1};
+var UNIT={'Distance Per 90':'m','Running Distance Per 90 (15-20)':'m','Meters Per Minute':'mpm',
+ 'High Intensity Distance Per 90':'m','HSR Distance Per 90 (20-25)':'m','Sprinting Distance Per 90 (+25)':'m',
+ 'Max Speed (km/h)':'kmh'};
+var SHORT={'Distance Per 90':'DIST','Running Distance Per 90 (15-20)':'RUN DIST','Meters Per Minute':'M/MIN',
+ 'High Intensity Distance Per 90':'HI DIST','HSR Distance Per 90 (20-25)':'HSR DIST',
+ 'Sprinting Distance Per 90 (+25)':'SPR DIST','High Intensity Count Per 90':'HI CNT',
+ 'HSR Count Per 90':'HSR CNT','Sprint Count Per 90':'SPR CNT','Max Speed (km/h)':'MAX SPD',
+ 'High Acceleration Count Per 90':'HI ACC','Medium Acceleration Count Per 90':'MED ACC',
+ 'High Deceleration Count Per 90':'HI DEC','Medium Deceleration Count Per 90':'MED DEC'};
+var NOTE={'Volume':'Total ground covered per 90 minutes.',
+ 'Repeated Efforts':'Work above 20 km/h, as distance and as effort counts.',
+ 'Top Speed':'Single-match peak speed. The least reliable figure on this card.',
+ 'Accel / Decel':'How often a player changes pace, not how hard he can.'};
+
+var P=D.rows.map(function(r,i){
+  return {i:i,name:r[0],team:r[1],league:D.leagues[r[2]],season:D.seasons[r[3]],pos:r[4],
+          grp:D.groups[r[5]].k,age:r[6],mins:r[7],mp:r[8],pool:r[9],raw:r[10],pct:r[11]};});
+P.forEach(function(p){
+  var g={},c={};
+  ML.forEach(function(l,j){var k=MG[j];g[k]=(g[k]||0)+p.pct[j];c[k]=(c[k]||0)+1;});
+  p.groupsPct={}; GROUPS.forEach(function(k){p.groupsPct[k]=Math.round(g[k]/c[k]);});
+  p.overall=Math.round(p.pct.reduce(function(a,b){return a+b;},0)/p.pct.length);
+  p.key=p.name+' | '+p.league+' | '+p.season;
+});
+var byKey={}; P.forEach(function(p){byKey[p.key]=p;});
+
+function band(v){return v<20?'var(--p0)':v<40?'var(--p1)':v<60?'var(--p2)':v<80?'var(--p3)':'var(--p4)';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmt(l,v){var u=UNIT[l]||'';
+  if(u==='m')return Math.round(v).toLocaleString()+' m';
+  if(u==='mpm')return v.toFixed(1)+' m/min';
+  if(u==='kmh')return v.toFixed(1)+' km/h';
+  return v.toFixed(1)+' /90';}
+function lgShort(l){return l==='MLS NEXT Pro'?'MLSNP':l==='USL Championship'?'USL C':'USL L1';}
+
+document.getElementById('stamp').innerHTML='MLS NEXT PRO &middot; USL C &middot; USL L1<br><b>'+
+  P.length.toLocaleString()+' PLAYER-SEASONS</b><br>2024 &ndash; 2026 &middot; PER 90';
+
+/* ---------- search ---------- */
+var q=document.getElementById('q'),res=document.getElementById('res'),cur=null,hi=-1,matches=[];
+function search(t){
+  t=t.trim().toLowerCase();
+  if(!t)return [];
+  var out=P.filter(function(p){return p.name.toLowerCase().indexOf(t)>=0||p.team.toLowerCase().indexOf(t)>=0;});
+  out.sort(function(a,b){
+    var ai=a.name.toLowerCase().indexOf(t),bi=b.name.toLowerCase().indexOf(t);
+    if(ai!==bi)return (ai<0?99:ai)-(bi<0?99:bi);
+    if(a.name!==b.name)return a.name.localeCompare(b.name);
+    return b.season.localeCompare(a.season);});
+  return out.slice(0,60);
+}
+function drawRes(){
+  if(!matches.length){res.innerHTML='<div class="none">No player matches that.</div>';res.hidden=false;return;}
+  res.innerHTML=matches.map(function(p,j){
+    return '<div class="'+(j===hi?'sel':'')+'" data-k="'+esc(p.key)+'"><span class="rn">'+esc(p.name)+
+      '</span><span class="rm">'+esc(p.team)+' &middot; '+lgShort(p.league)+' '+p.season+' &middot; '+p.grp+'</span></div>';}).join('');
+  res.hidden=false;
+}
+q.addEventListener('input',function(){matches=search(q.value);hi=matches.length?0:-1;drawRes();});
+q.addEventListener('focus',function(){if(q.value.trim()){matches=search(q.value);hi=0;drawRes();}});
+q.addEventListener('keydown',function(e){
+  if(res.hidden)return;
+  if(e.key==='ArrowDown'){e.preventDefault();hi=Math.min(hi+1,matches.length-1);drawRes();
+    var el=res.querySelector('.sel');if(el)el.scrollIntoView({block:'nearest'});}
+  else if(e.key==='ArrowUp'){e.preventDefault();hi=Math.max(hi-1,0);drawRes();
+    var el2=res.querySelector('.sel');if(el2)el2.scrollIntoView({block:'nearest'});}
+  else if(e.key==='Enter'){e.preventDefault();if(matches[hi])pick(matches[hi].key);}
+  else if(e.key==='Escape'){res.hidden=true;}
+});
+res.addEventListener('click',function(e){var d=e.target.closest('[data-k]');if(d)pick(d.getAttribute('data-k'));});
+document.addEventListener('click',function(e){if(!e.target.closest('.ctl'))res.hidden=true;});
+
+function pick(k){
+  cur=byKey[k]; res.hidden=true; q.value=cur.name;
+  buildCompare(); render(); paint();
+  if(history.replaceState)history.replaceState(null,'','#'+encodeURIComponent(k));
+}
+
+/* ---------- compare ---------- */
+var cmp=document.getElementById('cmp');
+function buildCompare(){
+  var peers=P.filter(function(p){return p.league===cur.league&&p.season===cur.season&&p.grp===cur.grp&&p.key!==cur.key;})
+    .sort(function(a,b){return a.name.localeCompare(b.name);});
+  cmp.innerHTML='<option value="">&mdash; none &mdash;</option>'+peers.map(function(p){
+    return '<option value="'+esc(p.key)+'">'+esc(p.name)+' &middot; '+esc(p.team)+'</option>';}).join('');
+}
+cmp.onchange=function(){render();};
+
+/* ---------- card ---------- */
+function rows(g,p,c,showPct){
+  var out='';
+  ML.forEach(function(l,j){
+    if(MG[j]!==g)return;
+    var v=p.pct[j],cv=c?c.pct[j]:null;
+    out+='<div class="row'+(LOWREL[l]?' flagged':'')+'"><div class="rlab">'+esc(l)+'</div>'+
+      '<div class="track">'+(showPct?'<div class="fill" style="width:'+v+'%;background:'+band(v)+'"></div>':'')+
+      (showPct&&cv!==null?'<div class="tick" style="left:calc('+cv+'% - 1px)" title="'+esc(c.name)+': '+cv+'"></div>':'')+
+      '</div><div class="rpct">'+(showPct?v:'&ndash;')+'</div>'+
+      '<div class="rraw">'+fmt(l,p.raw[j])+'</div></div>';
+  });
+  return out;
+}
+function block(g,p,c,showPct){
+  return '<div class="grp"><h3>'+g+'</h3><div class="grpnote">'+NOTE[g]+'</div>'+rows(g,p,c,showPct)+'</div>';}
+
+function render(){
+  var p=cur,c=cmp.value?byKey[cmp.value]:null,showPct=p.pool>=MIN_POOL;
+  document.getElementById('pn').textContent=p.name;
+  document.getElementById('pm').innerHTML=esc(p.team)+' &middot; <span>'+esc(p.league)+' '+p.season+
+    '</span> &middot; <span>'+esc(p.pos)+'</span> &middot; Age <span>'+(p.age==null?'&ndash;':p.age)+
+    '</span> &middot; <span>'+p.mins.toLocaleString()+'</span> min / '+p.mp+' apps';
+  document.getElementById('pl').innerHTML='RANKED VS <b>'+p.pool+'</b> '+GRPN[p.grp].toUpperCase()+
+    ' &middot; '+esc(p.league).toUpperCase()+' '+p.season+(p.pool<THIN_POOL?' &middot; <b>THIN POOL</b>':'');
+
+  var np=document.getElementById('nopool');
+  if(!showPct){np.hidden=false;
+    np.innerHTML='&#9651; Only '+p.pool+' '+GRPN[p.grp].toLowerCase()+' in '+esc(p.league)+' '+p.season+
+      ' have tracking data. That is too small a pool to rank against, so raw per-90 values are shown without percentiles.';
+  } else np.hidden=true;
+
+  document.getElementById('chips').innerHTML=(showPct?GROUPS.map(function(g){var v=p.groupsPct[g];
+    return '<div class="chip"><div class="k">'+g+'</div><div class="v" style="color:'+band(v)+'">'+v+'</div></div>';}).join('')+
+    '<div class="chip ovr"><div class="k">Physical avg</div><div class="v" style="color:'+band(p.overall)+'">'+p.overall+'</div></div>':'');
+
+  document.getElementById('colA').innerHTML=block('Volume',p,c,showPct)+block('Repeated Efforts',p,c,showPct);
+  document.getElementById('colB').innerHTML=block('Top Speed',p,c,showPct)+block('Accel / Decel',p,c,showPct);
+  document.getElementById('cmphint').textContent=c?('Blue marker = '+c.name+'.'):'Adds a marker on each bar.';
+
+  /* season history */
+  var hs=P.filter(function(x){return x.name===p.name&&x.team===p.team;})
+        .sort(function(a,b){return a.season.localeCompare(b.season)||a.league.localeCompare(b.league);});
+  if(hs.length<2)hs=P.filter(function(x){return x.name===p.name;})
+        .sort(function(a,b){return a.season.localeCompare(b.season)||a.league.localeCompare(b.league);});
+  var hd=document.getElementById('hist');
+  if(hs.length<2){hd.hidden=true;}
+  else{
+    hd.hidden=false;
+    var lines=[{k:'Physical avg',get:function(x){return x.overall;}}]
+      .concat(GROUPS.map(function(g){return {k:g,get:function(x){return x.groupsPct[g];}};}));
+    document.getElementById('histbody').innerHTML=lines.map(function(ln){
+      return '<div class="hrow"><div class="hl">'+(ln.k==='Physical avg'?'<b>'+ln.k+'</b>':ln.k)+'</div><div class="hbars">'+
+        hs.map(function(x){var v=x.pool>=MIN_POOL?ln.get(x):null;
+          return '<div class="hbar"><div class="hv" style="color:'+(v===null?'var(--muted)':band(v))+'">'+
+            (v===null?'&ndash;':v)+'</div><div class="hb" style="background:'+(v===null?'#20242C':band(v))+
+            ';opacity:'+(v===null?1:.55+0.45*v/100)+'"></div><div class="hk">'+lgShort(x.league)+' '+x.season+'</div></div>';
+        }).join('')+'</div></div>';}).join('');
+  }
+  var trs=document.querySelectorAll('#tbl tbody tr');
+  for(var i=0;i<trs.length;i++)trs[i].classList.toggle('on',trs[i].getAttribute('data-k')===p.key);
+}
+
+/* ---------- matrix ---------- */
+var COLS=[{k:'nm',t:'Player'},{k:'age',t:'AGE'},{k:'mins',t:'MIN'}]
+ .concat(GROUPS.map(function(g,i){return {k:'g:'+g,t:g.toUpperCase(),sep:i===0};}))
+ .concat([{k:'overall',t:'AVG'}])
+ .concat(ML.map(function(l,i){return {k:'m:'+i,t:SHORT[l],sep:i===0};}));
+function val(p,k){
+  if(k==='nm')return p.name;
+  if(k==='age')return p.age==null?0:p.age;
+  if(k==='mins')return p.mins;
+  if(k==='overall')return p.overall;
+  if(k.indexOf('g:')===0)return p.groupsPct[k.slice(2)];
+  return p.pct[+k.slice(2)];}
+var sortK='overall',desc=true;
+document.querySelector('#tbl thead').innerHTML='<tr>'+COLS.map(function(c){
+  return '<th tabindex="0" class="'+(c.k==='nm'?'nm':'')+(c.sep?' sep':'')+'" data-k="'+esc(c.k)+'">'+c.t+'</th>';}).join('')+'</tr>';
+
+function paint(){
+  var pool=P.filter(function(x){return x.league===cur.league&&x.season===cur.season&&x.grp===cur.grp;});
+  document.getElementById('mtitle').textContent=cur.league+' '+cur.season+' — '+GRPN[cur.grp];
+  document.getElementById('msub').textContent=pool.length+' players with tracking data. This is the pool every bar on the card above is measured against.';
+  var rs=pool.slice().sort(function(a,b){var x=val(a,sortK),y=val(b,sortK);
+    return typeof x==='string'?x.localeCompare(y)*(desc?-1:1):(desc?y-x:x-y);});
+  document.querySelector('#tbl tbody').innerHTML=rs.map(function(p){
+    return '<tr tabindex="0" data-k="'+esc(p.key)+'">'+COLS.map(function(c){
+      if(c.k==='nm')return '<td class="nm"><div class="n">'+esc(p.name)+'</div><div class="t">'+esc(p.team)+' &middot; '+esc(p.pos.split(',')[0])+'</div></td>';
+      if(c.k==='age')return '<td class="v">'+(p.age==null?'–':p.age)+'</td>';
+      if(c.k==='mins')return '<td class="v">'+p.mins.toLocaleString()+'</td>';
+      var v=val(p,c.k),g=(c.k.indexOf('g:')===0||c.k==='overall');
+      return '<td class="'+(g?'g':'v')+(c.sep?' sep':'')+'" style="background:color-mix(in oklab, '+band(v)+' 26%, transparent)">'+v+'</td>';
+    }).join('')+'</tr>';}).join('');
+  var ths=document.querySelectorAll('#tbl thead th');
+  for(var i=0;i<ths.length;i++)ths[i].classList.toggle('sorted',ths[i].getAttribute('data-k')===sortK);
+  var trs=document.querySelectorAll('#tbl tbody tr');
+  for(var j=0;j<trs.length;j++){(function(tr){
+    function go(){pick(tr.getAttribute('data-k'));
+      document.querySelector('.card').scrollIntoView({behavior:'smooth',block:'start'});}
+    tr.onclick=go;
+    tr.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};})(trs[j]);}
+  for(var m=0;m<trs.length;m++)trs[m].classList.toggle('on',trs[m].getAttribute('data-k')===cur.key);
+}
+function sortBy(k){if(sortK===k)desc=!desc;else{sortK=k;desc=(k!=='nm');}paint();}
+document.querySelector('#tbl thead').onclick=function(e){var th=e.target.closest('th');if(th)sortBy(th.getAttribute('data-k'));};
+document.querySelector('#tbl thead').onkeydown=function(e){
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  var th=e.target.closest('th');if(th){e.preventDefault();sortBy(th.getAttribute('data-k'));}};
+
+/* ---------- boot ---------- */
+var start=null;
+if(location.hash){var k=decodeURIComponent(location.hash.slice(1));if(byKey[k])start=byKey[k];}
+if(!start){
+  var pref=P.filter(function(p){return p.season==='2026'&&p.pool>=THIN_POOL&&p.mins>1200;});
+  start=(pref.length?pref:P).slice().sort(function(a,b){return b.overall-a.overall;})[0];
+}
+cur=start; q.value=cur.name; buildCompare(); render(); paint();
+})();
+</script>
