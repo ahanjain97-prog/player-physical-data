@@ -34,21 +34,39 @@ league-season-position pool are the only stable unit.
 
 ## How reliable is any of it
 
-Year-over-year correlation for the same player, **compared within his own position group**
-(n = 290 repeat players):
+Two different questions, measured separately.
 
-| Metric | r |
-|---|---:|
-| Distance Per 90 / Meters Per Minute | 0.43 |
-| High Intensity / HSR distance & counts | 0.47 – 0.56 |
-| Sprint distance & count | 0.47 – 0.57 |
-| High Acceleration Count | 0.57 |
-| **Max Speed** | **0.22** |
+**Repeatability** — year-over-year correlation for the same player, **compared within his own
+position group** (n = 367 repeat players). **Team share** — the variance inside a
+league-season-position pool explained by which club he plays for, corrected against a
+permuted-label baseline (raw eta² sits near 29% on noise alone at these pool sizes).
+
+| Metric | r | Team share | Reads as |
+|---|---:|---:|---|
+| Sprint Count Per 90 | 0.49 | 12% | player capability |
+| Sprinting Distance Per 90 | 0.45 | 12% | player capability |
+| HSR Count Per 90 | 0.40 | 14% | player capability |
+| Running Distance Per 90 | 0.42 | 16% | mixed |
+| High Intensity Count Per 90 | 0.45 | 17% | mixed |
+| HSR Distance Per 90 | 0.41 | 17% | mixed |
+| High Intensity Distance Per 90 | 0.43 | 18% | mixed |
+| High Deceleration Count Per 90 | 0.44 | 21% | team / role |
+| Meters Per Minute | 0.42 | 22% | team / role |
+| Distance Per 90 | 0.42 | 23% | team / role |
+| Medium Acceleration Count Per 90 | 0.43 | 24% | team / role |
+| Medium Deceleration Count Per 90 | 0.46 | 26% | team / role |
+| High Acceleration Count Per 90 | 0.50 | 28% | team / role |
+| **Max Speed** | **0.25** | 17% | **unreliable** |
+
+Sprint count and sprint distance are the closest thing here to a measure of the athlete:
+they repeat as well as anything and are least explained by the club. Distance per 90 and
+meters per minute are reliable but describe the job more than the player. High acceleration
+count repeats best of all yet is the most club-explained figure on the card — it reads as
+team tempo.
 
 A caution worth repeating: pooled across all positions, Distance Per 90 correlates at 0.86
 year-over-year, which looks excellent. Almost all of that is position — centre backs stay
-centre backs. Compare like-for-like within a position group and it falls to 0.43. The
-metrics flagged with △ on the card are the least reproducible.
+centre backs. Compare like-for-like within a position group and it falls to 0.42.
 
 ## Rebuilding after new exports
 
