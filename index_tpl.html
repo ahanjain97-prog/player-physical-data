@@ -212,6 +212,12 @@ table.stab tr.b-des td.n.t{color:var(--warn)}
 .h2hfoot{padding:16px 24px 20px;border-top:1px solid var(--line);background:#101218;
   color:var(--muted);font-size:12px}
 .h2hfoot b{color:var(--ink2);font-weight:600}
+.dbraw{font-variant-numeric:tabular-nums;font-size:10.5px;color:var(--muted);text-align:right;white-space:nowrap}
+.colh{font-family:var(--disp);font-size:9px;letter-spacing:.1em;color:var(--muted);text-align:right}
+.pr{display:none!important}
+.printhead{padding:18px 24px 0}
+.printhead h1{font-size:19px;margin-bottom:3px}
+.printhead .ph{font-size:11.5px;color:var(--muted)}
 @media (max-width:760px){
   .h2hwho{grid-template-columns:1fr}
   .who+.who{border-left:0;border-top:1px solid var(--line)}
@@ -265,6 +271,57 @@ td.sep,th.sep{border-left:1px solid var(--line2)}
   #q{min-width:220px}
 }
 @media (prefers-reduced-motion:no-preference){.fill{transition:width .28s ease}}
+
+/* ---- print / save as PDF ----
+   The whole page is token-driven, so paper is mostly a matter of redefining the
+   tokens. Series hues are deepened here: the screen blue only makes 2.97:1 on
+   white, while #2E7FBF and #B5621C both clear 3:1 and keep the CVD separation. */
+@media print{
+  @page{size:A4 portrait;margin:11mm}
+  :root{
+    --ground:#fff; --panel:#fff; --panel2:#fff; --line:#D3D6DB; --line2:#AEB3BC;
+    --ink:#12141A; --ink2:#333842; --muted:#5E6572; --accent:#1F6FA8; --warn:#7A4F0C;
+    --pa:#2E7FBF; --pb:#B5621C;
+    --dbcols:minmax(96px,1.05fr) minmax(120px,2.1fr) 58px 26px 58px 26px 34px;
+  }
+  html{color-scheme:light}
+  body{background:#fff!important;color:var(--ink)!important;padding:0;font-size:11px}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .wrap{max-width:none;padding:0}
+  .pr{display:block!important}
+  span.pr{display:inline!important}
+  .dbgrid{background:#E4E7EB}
+  .dbgrid.mid{background:#C9CDD4}
+  .dbcon{background:#9BA1AA}
+  .h2hfoot{background:#F5F6F8}
+  .xwarn{background:#FBF3E2;border-color:#D9C48E;color:#7A4F0C}
+  .dbtip{display:none!important}
+
+  /* chart-only export: everything that is not the head-to-head panel steps aside */
+  html.print-h2h header,
+  html.print-h2h .controls,
+  html.print-h2h .card,
+  html.print-h2h .matrix,
+  html.print-h2h .pickers{display:none!important}
+  html.print-h2h .h2h{border:0;margin:0}
+  html.print-h2h .h2hhead{border-bottom:0;padding-bottom:0}
+  html.print-h2h .h2hhead h2{display:none}
+
+  .h2h{break-inside:auto}
+  .dbgrp,.h2hwho,.who,.dbrow,.dbsum{break-inside:avoid}
+  .dbgrp{padding:12px 0 13px}
+  .h2hwho{padding:0}
+  .who{padding:10px 0}
+  .who+.who{border-left:1px solid var(--line);padding-left:16px}
+  .xwarn,.h2hfoot{padding-left:0;padding-right:0}
+  .printhead{padding:0 0 10px}
+  .h2hhead{padding:0}
+  .h2hhead .msub{font-size:10.5px}
+  .dbgrp .gn{font-size:10px;margin-bottom:9px}
+  .dbtrack{height:18px}
+  .dbdot{width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-width:1.5px}
+  .h2hfoot{font-size:10px;padding-top:10px}
+}
 </style>
 
 <header>
@@ -354,6 +411,7 @@ td.sep,th.sep{border-left:1px solid var(--line2)}
   </section>
 
   <section class="h2h">
+    <div class="printhead pr" id="dbPrintHead"></div>
     <div class="h2hhead">
       <h2>Head to head</h2>
       <div class="msub">Any two players, from any two leagues or seasons. Each dot is that player's percentile
@@ -373,6 +431,7 @@ td.sep,th.sep{border-left:1px solid var(--line2)}
       </div>
       <button type="button" class="swap" id="dbSwap">Swap</button>
       <button type="button" class="swap" id="dbFromCard">Use card player as A</button>
+      <button type="button" class="swap" id="dbPdf">Export PDF</button>
     </div>
     <div class="h2hwho" id="dbWho"></div>
     <div class="xwarn" id="dbWarn" hidden></div>
@@ -748,11 +807,18 @@ function whoCard(p,side){
     ' &middot; Age '+(p.age==null?'&ndash;':p.age)+' &middot; '+p.mins.toLocaleString()+' min</div>'+
     '<div class="wp">RANKED VS '+p.pool+' '+GRPN[p.grp].toUpperCase()+'</div></div>';
 }
+/* Extra raw-value cells carry .pr: hidden on screen (where hover shows them) and
+   laid out in print, where there is no hover and the sheet must stand on its own.
+   display:none removes a grid item entirely, so the column count matches either way. */
 function dbAxis(){
   var t='';
   [0,25,50,75,100].forEach(function(v){t+='<span style="left:'+v+'%">'+v+'</span>';});
-  return '<div class="dbaxis"><div></div><div class="ax">'+t+'</div><div></div><div></div><div></div></div>';
+  return '<div class="dbaxis"><div></div><div class="ax">'+t+'</div>'+
+    '<div class="colh pr">RAW</div><div class="colh"><span class="pr">'+esc(surnameOf(dbA))+'</span></div>'+
+    '<div class="colh pr">RAW</div><div class="colh"><span class="pr">'+esc(surnameOf(dbB))+'</span></div>'+
+    '<div class="colh"><span class="pr">GAP</span></div></div>';
 }
+function surnameOf(p){var w=p.name.split(/\s+/);return w[w.length-1];}
 function dbRowHtml(label){
   var j=MIDX[label],a=dbA.pct[j],b=dbB.pct[j],lo=Math.min(a,b),d=Math.abs(a-b);
   var lead=a===b?null:(a>b?'a':'b');
@@ -765,7 +831,8 @@ function dbRowHtml(label){
       '<div class="dbdot a" style="left:'+a+'%" data-m="'+esc(label)+'" data-s="a"></div>'+
       '<div class="dbdot b" style="left:'+b+'%" data-m="'+esc(label)+'" data-s="b"></div>'+
     '</div>'+
-    '<div class="dbv">'+a+'</div><div class="dbv">'+b+'</div>'+
+    '<div class="dbraw pr">'+fmt(label,dbA.raw[j])+'</div><div class="dbv">'+a+'</div>'+
+    '<div class="dbraw pr">'+fmt(label,dbB.raw[j])+'</div><div class="dbv">'+b+'</div>'+
     '<div class="dbd">'+(lead?'<i style="background:var(--p'+(lead==='a'?'a':'b')+')"></i>':'')+d+'</div></div>';
 }
 function groupAvg(p,labels){
@@ -774,6 +841,11 @@ function groupAvg(p,labels){
 function renderDumbbell(){
   if(!dbA||!dbB)return;
   dbWho.innerHTML=whoCard(dbA,'a')+whoCard(dbB,'b');
+  document.getElementById('dbPrintHead').innerHTML=
+    '<h1>'+esc(dbA.name)+' vs '+esc(dbB.name)+'</h1>'+
+    '<div class="ph">Physical comparison &middot; percentile within each player\'s own league, season and '+
+    'position pool &middot; per 90 minutes &middot; generated '+
+    new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})+'</div>';
 
   var diffPool=(dbA.league!==dbB.league||dbA.season!==dbB.season||dbA.grp!==dbB.grp);
   if(diffPool){
@@ -788,7 +860,8 @@ function renderDumbbell(){
     return '<div class="dbgrp"><h3>'+g.t+'</h3><div class="gn">'+g.n+'</div>'+dbAxis()+
       g.m.map(dbRowHtml).join('')+
       '<div class="dbsum"><div class="dblab">GROUP AVERAGE</div><div></div>'+
-        '<div class="dbv">'+groupAvg(dbA,g.m)+'</div><div class="dbv">'+groupAvg(dbB,g.m)+'</div>'+
+        '<div class="pr"></div><div class="dbv">'+groupAvg(dbA,g.m)+'</div>'+
+        '<div class="pr"></div><div class="dbv">'+groupAvg(dbB,g.m)+'</div>'+
         '<div class="dbd">'+Math.abs(groupAvg(dbA,g.m)-groupAvg(dbB,g.m))+'</div></div></div>';
   }).join('');
 
@@ -815,6 +888,20 @@ attachPicker(qb,document.getElementById('resb'),function(k){dbSet('b',byKey[k]);
 document.getElementById('dbSwap').onclick=function(){var t=dbA;dbA=dbB;dbB=t;
   qa.value=dbA.name;qb.value=dbB.name;renderDumbbell();};
 document.getElementById('dbFromCard').onclick=function(){dbSet('a',cur);};
+
+/* Export = the browser's own print-to-PDF. Vector text, exact colour, no library.
+   The class narrows the sheet to the chart; afterprint is unreliable in some
+   browsers, so a timer clears it too. */
+function endPrint(){document.documentElement.classList.remove('print-h2h');}
+document.getElementById('dbPdf').onclick=function(){
+  var t=document.title;
+  document.title=dbA.name+' vs '+dbB.name+' — physical comparison';
+  document.documentElement.classList.add('print-h2h');
+  dbTip.hidden=true;
+  window.print();
+  setTimeout(function(){endPrint();document.title=t;},800);
+};
+window.addEventListener('afterprint',endPrint);
 
 /* hover detail: raw values behind each dot, since raw is what a scout recognises */
 dbBody.addEventListener('mouseover',function(e){
