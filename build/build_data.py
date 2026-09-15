@@ -9,6 +9,14 @@ Each export must be a Wyscout "Search results" xlsx containing the physical
 columns (Total Distance per 90 ... Count HI per 90). Name the files by league
 and season so SOURCES below can pick them up.
 
+Two export shapes are accepted. The full 129-column search export carries the
+player's club during the season. The slim physical-only export (19 columns)
+carries only his club today, so a player who has since moved is labelled
+"Now at" his new club rather than passed off as having played there.
+
+Adding a league is one line in SOURCES; the league and season lists are derived
+from it.
+
 Writes site_data.json, then inlines it into index.html via index_tpl.html.
 """
 import json
@@ -27,7 +35,21 @@ SOURCES = [
     ("usl c 26.xlsx", "USL Championship", "2026"),
     ("usl l1 25.xlsx", "USL League One", "2025"),
     ("usl l1 26.xlsx", "USL League One", "2026"),
+    # The export itself carries no season. Filed as 2026 on its clubs: FC Supra and
+    # Inter Toronto are in it, York United and Valour are not.
+    ("cpl 26.xlsx", "Canadian Premier League", "2026"),
 ]
+
+# Rows under this are dropped before ranking. The MLS NEXT Pro and USL exports were
+# pulled with a minutes filter already (lowest shipped row: 615 min), so 600 leaves
+# every one of them untouched. It exists for exports pulled without one -- the CPL
+# file includes 10-minute cameos, and a per-90 sprint count off 10 minutes would
+# distort the percentile of everyone ranked in the same pool.
+MIN_MINUTES = 600
+
+# In a slim export, a club that appears on this many rows or fewer is not one of the
+# league's sides -- it is where a player went afterwards.
+DEPARTED_CLUB_MAX_ROWS = 2
 
 A2 = "²"
 
@@ -91,30 +113,53 @@ def load(folder):
         for j, h in enumerate(header):
             col.setdefault(h, j)  # first occurrence: the GK duplicate columns are ignored
 
-        kept = 0
+        missing = [src for _, _, src in METRICS if src not in col]
+        if missing:
+            sys.exit("%s is missing physical columns: %s" % (filename, ", ".join(missing)))
+
+        season_team = col.get("Team within selected timeframe")  # absent from slim exports
+        matches = col.get("Matches played")                       # likewise
+        club_rows = collections.Counter(str(r[col["Team"]] or "").strip() for r in rows[1:])
+
+        kept = short = 0
         for row in rows[1:]:
             values = {label: num(row[col[src]]) for _, label, src in METRICS}
             if any(v is None for v in values.values()):
                 continue  # partial tracking coverage: drop rather than rank on gaps
+            minutes = int(num(row[col["Minutes played"]]) or 0)
+            if minutes < MIN_MINUTES:
+                short += 1
+                continue
             primary = str(row[col["Position"]] or "").split(",")[0].strip()
             if primary not in POSITION_GROUP:
                 continue
+
+            if season_team is not None:
+                # team during the season, not the player's club today
+                team = str(row[season_team] or row[col["Team"]] or "").strip()
+            else:
+                team = str(row[col["Team"]] or "").strip()
+                if team and club_rows[team] <= DEPARTED_CLUB_MAX_ROWS:
+                    team = "Now at " + team
+
             age = num(row[col["Age"]])
+            mp = num(row[matches]) if matches is not None else None
             records.append({
                 "name": str(row[col["Player"]] or "").strip(),
-                # team during the season, not the player's club today
-                "team": str(row[col["Team within selected timeframe"]] or row[col["Team"]] or "").strip(),
+                "team": team,
                 "league": league,
                 "season": season,
                 "pos": str(row[col["Position"]] or "").strip(),
                 "grp": POSITION_GROUP[primary],
                 "age": int(age) if age else None,
-                "mins": int(num(row[col["Minutes played"]]) or 0),
-                "mp": int(num(row[col["Matches played"]]) or 0),
+                "mins": minutes,
+                "mp": int(mp) if mp else None,
                 "metrics": values,
             })
             kept += 1
-        print("  %-16s %s %s  ->  %d rows with full tracking data" % (filename, league, season, kept))
+        note = "  (%d under %d min dropped)" % (short, MIN_MINUTES) if short else ""
+        print("  %-16s %s %s  ->  %d rows with full tracking data%s"
+              % (filename, league, season, kept, note))
     return records
 
 
@@ -151,18 +196,19 @@ def main():
         sys.exit("no rows loaded - check the export folder and SOURCES filenames")
     pools = add_percentiles(records)
 
+    # derived, so a new league needs only its SOURCES line
+    leagues = list(dict.fromkeys(league for _, league, _ in SOURCES))
+    seasons = sorted(set(season for _, _, season in SOURCES))
+    labels = [label for _, label, _ in METRICS]
+
     print("\npool depth (league x season x position group)")
-    print("%-24s%s" % ("", "".join("%7s" % g for g in GROUP_ORDER)))
-    for league in ["MLS NEXT Pro", "USL Championship", "USL League One"]:
-        for season in ["2024", "2025", "2026"]:
+    print("%-30s%s" % ("", "".join("%7s" % g for g in GROUP_ORDER)))
+    for league in leagues:
+        for season in seasons:
             if not any(k[0] == league and k[1] == season for k in pools):
                 continue
             counts = "".join("%7d" % len(pools.get((league, season, g), [])) for g in GROUP_ORDER)
-            print("%-24s%s" % (league + " " + season, counts))
-
-    leagues = ["MLS NEXT Pro", "USL Championship", "USL League One"]
-    seasons = ["2024", "2025", "2026"]
-    labels = [label for _, label, _ in METRICS]
+            print("%-30s%s" % (league + " " + season, counts))
 
     rows = []
     for r in sorted(records, key=lambda x: (x["name"], x["season"])):

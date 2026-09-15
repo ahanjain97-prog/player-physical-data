@@ -329,8 +329,8 @@ td.sep,th.sep{border-left:1px solid var(--line2)}
     <div class="mastL"><div class="bar"></div>
       <div>
         <h1>Physical<em>Capability</em></h1>
-        <p class="sub">Tracking data for <b>2,079 player-seasons</b> across MLS NEXT Pro, USL Championship
-        and USL League One, 2024&ndash;2026. Every bar is a percentile against players in the
+        <p class="sub">Tracking data for <b id="subCount"></b> across <span id="subLeagues"></span>,
+        <span id="subSeasons"></span>. Every bar is a percentile against players in the
         <b>same league, same season, same position group</b> &mdash; the only comparison this data supports.</p>
       </div>
     </div>
@@ -388,7 +388,8 @@ td.sep,th.sep{border-left:1px solid var(--line2)}
 
       <h3>How much weight each metric carries</h3>
       <p>Two separate questions decide that. <b>Repeatability</b> is how well a metric holds up for the same player
-      across consecutive seasons, measured within his own position group (367 repeat players). <b>Team share</b>
+      across consecutive seasons, measured within his own position group (367 repeat players in MLS NEXT Pro and USL &mdash; the
+      leagues with consecutive seasons on file). <b>Team share</b>
       is how much of the spread inside a pool is explained simply by which club he plays for, corrected for chance
       by permutation. A metric can repeat well and still tell you more about the team than the player &mdash;
       high acceleration count does exactly that.</p>
@@ -404,7 +405,7 @@ td.sep,th.sep{border-left:1px solid var(--line2)}
       club. Distance per 90 and meters per minute are reliable numbers but heavily role- and system-driven &mdash;
       they describe the job he is asked to do more than what he is capable of. Acceleration and deceleration counts
       are the most club-explained figures on the card. <b>Max speed is the one to distrust</b>: repeatability of
-      0.25, and the median rose about 1.2 km/h in 2026 in all three leagues at once, which is a measurement change
+      0.25, and the median rose about 1.2 km/h in 2026 in MLS NEXT Pro and both USL leagues at once, which is a measurement change
       rather than players getting faster. Two coverage notes: <b>MLS NEXT Pro 2024</b> holds tracking for only 26%
       of that season, and raw values are never comparable across seasons or leagues &mdash; use the percentiles.</p>
     </div>
@@ -510,12 +511,18 @@ P.forEach(function(p){
   ML.forEach(function(l,j){var k=MG[j];g[k]=(g[k]||0)+p.pct[j];c[k]=(c[k]||0)+1;});
   p.groupsPct={}; GROUPS.forEach(function(k){p.groupsPct[k]=Math.round(g[k]/c[k]);});
   p.overall=Math.round(p.pct.reduce(function(a,b){return a+b;},0)/p.pct.length);
-  /* Row index, not name: the file holds namesakes who share a league and season -- three
-     different players (A. Rocha, C. Herrera, N. Pierre) and four same-club pairs. A name
-     key would drop one of each. Index is stable because the build sorts by (name, season). */
-  p.key=String(p.i);
 });
-var byKey={}; P.forEach(function(p){byKey[p.key]=p;});
+/* Key by who the player is, not by row number. Rows sort by name, so adding a league
+   shifts every row number -- and a link someone had already shared would open a
+   different player. Same-club namesakes in one season (J. Rodriguez, Las Vegas 2025;
+   C. Zambrano, New England II 2026) take ~2 in file order, which does not change. */
+var byKey={},KEYSEEN={};
+P.forEach(function(p){
+  var base=p.name+'|'+p.team+'|'+p.league+'|'+p.season;
+  KEYSEEN[base]=(KEYSEEN[base]||0)+1;
+  p.key=KEYSEEN[base]>1?base+'~'+KEYSEEN[base]:base;
+  byKey[p.key]=p;
+});
 
 function band(v){return v<20?'var(--p0)':v<40?'var(--p1)':v<60?'var(--p2)':v<80?'var(--p3)':'var(--p4)';}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -524,10 +531,21 @@ function fmt(l,v){var u=UNIT[l]||'';
   if(u==='mpm')return v.toFixed(1)+' m/min';
   if(u==='kmh')return v.toFixed(1)+' km/h';
   return v.toFixed(1)+' /90';}
-function lgShort(l){return l==='MLS NEXT Pro'?'MLSNP':l==='USL Championship'?'USL C':'USL L1';}
+/* Short labels for tight spots. An unknown league falls back to its full name --
+   the old ternary labelled any league it did not recognise as "USL L1". */
+var LGSHORT={'MLS NEXT Pro':'MLSNP','USL Championship':'USL C','USL League One':'USL L1',
+             'Canadian Premier League':'CPL'};
+function lgShort(l){return LGSHORT[l]||l;}
 
-document.getElementById('stamp').innerHTML='MLS NEXT PRO &middot; USL C &middot; USL L1<br><b>'+
-  P.length.toLocaleString()+' PLAYER-SEASONS</b><br>2024 &ndash; 2026 &middot; PER 90';
+/* Masthead copy comes from the data, so it cannot go stale when a league is added. */
+var SEASON_SPAN=D.seasons[0]+' &ndash; '+D.seasons[D.seasons.length-1];
+document.getElementById('stamp').innerHTML=
+  D.leagues.map(function(l){return esc(lgShort(l)).toUpperCase();}).join(' &middot; ')+'<br><b>'+
+  P.length.toLocaleString()+' PLAYER-SEASONS</b><br>'+SEASON_SPAN+' &middot; PER 90';
+document.getElementById('subCount').textContent=P.length.toLocaleString()+' player-seasons';
+document.getElementById('subLeagues').textContent=D.leagues.length>1
+  ?D.leagues.slice(0,-1).join(', ')+' and '+D.leagues[D.leagues.length-1]:D.leagues[0];
+document.getElementById('subSeasons').innerHTML=SEASON_SPAN;
 
 /* ---------- search ---------- */
 var q=document.getElementById('q'),res=document.getElementById('res'),cur=null;
@@ -639,7 +657,7 @@ function render(){
   document.getElementById('pn').textContent=p.name;
   document.getElementById('pm').innerHTML=esc(p.team)+' &middot; <span>'+esc(p.league)+' '+p.season+
     '</span> &middot; <span>'+esc(p.pos)+'</span> &middot; Age <span>'+(p.age==null?'&ndash;':p.age)+
-    '</span> &middot; <span>'+p.mins.toLocaleString()+'</span> min / '+p.mp+' apps';
+    '</span> &middot; <span>'+p.mins.toLocaleString()+'</span> min'+(p.mp?' / '+p.mp+' apps':'');
   document.getElementById('pl').innerHTML='RANKED VS <b>'+p.pool+'</b> '+GRPN[p.grp].toUpperCase()+
     ' &middot; '+esc(p.league).toUpperCase()+' '+p.season+(p.pool<THIN_POOL?' &middot; <b>THIN POOL</b>':'');
 

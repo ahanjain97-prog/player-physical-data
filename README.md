@@ -1,30 +1,51 @@
 # Player Physical Data
 
-A single-page site for browsing tracking data across MLS NEXT Pro, USL Championship and
-USL League One, 2024–2026. Search a player, get a physical capability card: every metric
+A single-page site for browsing tracking data across MLS NEXT Pro, USL Championship,
+USL League One and the Canadian Premier League, 2024–2026. Search a player, get a physical
+capability card: every metric
 percentile-ranked against players in the **same league, same season, same position group**.
 
 **Live:** https://ahanjain97-prog.github.io/player-physical-data/
 
 ## What's in it
 
-2,079 player-seasons with a complete physical block, drawn from seven Wyscout exports.
+2,204 player-seasons with a complete physical block and at least 600 minutes, drawn from eight Wyscout exports.
 
 | League | 2024 | 2025 | 2026 |
 |---|---:|---:|---:|
 | MLS NEXT Pro | 116 | 358 | 383 |
 | USL Championship | — | 431 | 380 |
 | USL League One | — | 172 | 239 |
+| Canadian Premier League | — | — | 125 |
 
 Rows without a complete set of fourteen physical metrics are dropped rather than ranked on
-gaps. Position groups are CB, FB, MID (DM/CM/AM) and FWD (W/CF), plus GK.
+gaps, as are rows under 600 minutes. Position groups are CB, FB, MID (DM/CM/AM) and FWD
+(W/CF), plus GK.
+
+The 600-minute floor matches the loosest of the original exports (lowest shipped row: 615
+minutes), so it leaves every MLS NEXT Pro and USL row untouched. It exists for exports
+pulled without a minutes filter: the CPL file included 10-minute cameos, and a per-90 rate
+off a cameo would distort the percentile of everyone ranked in the same pool. 45 CPL rows
+fall below it.
+
+**CPL notes.** The CPL export is the slim physical-only format, which differs in two ways:
+
+- **No season.** It is filed as 2026 on its clubs — FC Supra and Inter Toronto are in it,
+  York United and Valour are not. If that is wrong, change its line in `SOURCES`.
+- **Only today's club.** The full exports carry each player's club during the season; this
+  one carries his club now. The two players who have since left the league are labelled
+  *Now at* their new club rather than presented as having played there. There is no
+  matches-played column either, so CPL cards show minutes without an apps count.
+
+The CPL goalkeeper pool is 7, under the 10-player minimum, so CPL keepers show raw values
+with percentiles suppressed.
 
 ## Why percentiles, and only within a league-season
 
 Tracking baselines move between seasons by more than players do. Measured on the same
 players, same league, 2025 → 2026:
 
-- **Max Speed** median rose ~1.2 km/h in all three leagues simultaneously — a measurement
+- **Max Speed** median rose ~1.2 km/h in MLS NEXT Pro and both USL leagues simultaneously — a measurement
   change, not a fitness change.
 - **High Acceleration Count** median in USL Championship went 28.8 → 39.4 (+37%).
 - MLS NEXT Pro 2024 → 2025 acceleration counts jumped ~64%.
@@ -37,7 +58,8 @@ league-season-position pool are the only stable unit.
 Two different questions, measured separately.
 
 **Repeatability** — year-over-year correlation for the same player, **compared within his own
-position group** (n = 367 repeat players). **Team share** — the variance inside a
+position group** (n = 367 repeat players in MLS NEXT Pro and USL; CPL has one season on
+file, so it contributes no repeat pairs). **Team share** — the variance inside a
 league-season-position pool explained by which club he plays for, corrected against a
 permuted-label baseline (raw eta² sits near 29% on noise alone at these pool sizes).
 
@@ -76,7 +98,10 @@ pip install openpyxl
 python build/build_data.py
 ```
 
-That regenerates `site_data.json` and rewrites `index.html` from `index_tpl.html`.
+That regenerates `site_data.json` and rewrites `index.html` from `index_tpl.html`. Adding a
+league is one line in `SOURCES`; the league and season lists, the masthead and the filters
+all follow from the data. Both the full 129-column search export and the slim 19-column
+physical-only export are accepted.
 Edit `index_tpl.html`, never `index.html` — the latter is generated and holds the inlined data.
 
 ## Layout
