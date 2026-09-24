@@ -15,7 +15,9 @@ carries only his club today, so a player who has since moved is labelled
 "Now at" his new club rather than passed off as having played there.
 
 Adding a league is one line in SOURCES; the league and season lists are derived
-from it.
+from it. A league-season may list several files -- a season is often pulled in
+position slices -- and rows repeated across them are deduplicated. An optional
+fourth field limits a file to certain position groups.
 
 Writes site_data.json, then inlines it into index.html via index_tpl.html.
 """
@@ -30,7 +32,14 @@ import openpyxl
 SOURCES = [
     ("mlsnp 24.xlsx", "MLS NEXT Pro", "2024"),
     ("mlsnp 25.xlsx", "MLS NEXT Pro", "2025"),
-    ("mlsnp 26.xlsx", "MLS NEXT Pro", "2026"),
+    # 24 Sep pull, exported in three position slices. A player listed at two
+    # positions appears in more than one slice; the repeats are dropped after loading.
+    ("mlsnp 26 att.xlsx", "MLS NEXT Pro", "2026"),
+    ("mlsnp 26 mid.xlsx", "MLS NEXT Pro", "2026"),
+    ("mlsnp 26 def.xlsx", "MLS NEXT Pro", "2026"),
+    # Those slices contain no goalkeepers, so 2026 keepers stay on the 6 Sep full
+    # export until a keeper slice is pulled. The fourth field limits it to that group.
+    ("mlsnp 26.xlsx", "MLS NEXT Pro", "2026", {"GK"}),
     ("usl c 25.xlsx", "USL Championship", "2025"),
     ("usl c 26.xlsx", "USL Championship", "2026"),
     ("usl l1 25.xlsx", "USL League One", "2025"),
@@ -101,7 +110,9 @@ def num(v):
 def load(folder):
     """Read every source workbook, keeping only rows with a complete physical block."""
     records = []
-    for filename, league, season in SOURCES:
+    for entry in SOURCES:
+        filename, league, season = entry[:3]
+        only_groups = entry[3] if len(entry) > 3 else None
         path = os.path.join(folder, filename)
         if not os.path.exists(path):
             print("  missing, skipped: %s" % filename)
@@ -133,6 +144,8 @@ def load(folder):
             primary = str(row[col["Position"]] or "").split(",")[0].strip()
             if primary not in POSITION_GROUP:
                 continue
+            if only_groups and POSITION_GROUP[primary] not in only_groups:
+                continue
 
             if season_team is not None:
                 # team during the season, not the player's club today
@@ -161,6 +174,28 @@ def load(folder):
         print("  %-16s %s %s  ->  %d rows with full tracking data%s"
               % (filename, league, season, kept, note))
     return records
+
+
+def dedupe(records):
+    """Drop rows repeated across position slices of the same league-season.
+
+    Keyed on the whole record, not the name: the exports contain namesakes whose
+    rows are genuinely different players, and a name-level dedupe would throw one
+    of each pair away.
+    """
+    labels = [label for _, label, _ in METRICS]
+    seen = set()
+    out = []
+    for r in records:
+        sig = (r["league"], r["season"], r["name"], r["pos"], r["age"], r["mins"],
+               tuple(round(r["metrics"][l], 3) for l in labels))
+        if sig in seen:
+            continue
+        seen.add(sig)
+        out.append(r)
+    if len(out) != len(records):
+        print("  %d rows repeated across position slices removed" % (len(records) - len(out)))
+    return out
 
 
 def add_percentiles(records):
@@ -194,11 +229,12 @@ def main():
     records = load(folder)
     if not records:
         sys.exit("no rows loaded - check the export folder and SOURCES filenames")
+    records = dedupe(records)
     pools = add_percentiles(records)
 
     # derived, so a new league needs only its SOURCES line
-    leagues = list(dict.fromkeys(league for _, league, _ in SOURCES))
-    seasons = sorted(set(season for _, _, season in SOURCES))
+    leagues = list(dict.fromkeys(e[1] for e in SOURCES))   # entries may carry a 4th field
+    seasons = sorted(set(e[2] for e in SOURCES))
     labels = [label for _, label, _ in METRICS]
 
     print("\npool depth (league x season x position group)")

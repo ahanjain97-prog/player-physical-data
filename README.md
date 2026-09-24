@@ -9,14 +9,21 @@ percentile-ranked against players in the **same league, same season, same positi
 
 ## What's in it
 
-2,204 player-seasons with a complete physical block and at least 600 minutes, drawn from eight Wyscout exports.
+2,349 player-seasons with a complete physical block and at least 600 minutes, drawn from eleven Wyscout exports.
 
 | League | 2024 | 2025 | 2026 |
 |---|---:|---:|---:|
-| MLS NEXT Pro | 116 | 358 | 383 |
+| MLS NEXT Pro | 116 | 358 | 528 |
 | USL Championship | — | 431 | 380 |
 | USL League One | — | 172 | 239 |
 | Canadian Premier League | — | — | 125 |
+
+**MLS NEXT Pro 2026** was refreshed on 24 September from three position slices — attackers,
+midfielders, defenders — pulled without a minutes filter. Rows repeated across slices are
+deduplicated on the whole record rather than on the name, because the exports contain
+namesakes whose rows are different players. Those slices carry no goalkeepers, so the 21
+keepers still come from the 6 September full export and sit a few weeks behind the outfield
+rows; keepers are only ever ranked against keepers, so no other pool is affected.
 
 Rows without a complete set of fourteen physical metrics are dropped rather than ranked on
 gaps, as are rows under 600 minutes. Position groups are CB, FB, MID (DM/CM/AM) and FWD
